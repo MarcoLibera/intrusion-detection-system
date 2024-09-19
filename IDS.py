@@ -1,5 +1,6 @@
 from scapy.all import *
 import datetime
+import sys
 
 class Rule():
     '''
@@ -113,7 +114,7 @@ class IDS():
     # a certain time interval, specified by the filter_secs parameter of the method
     timestamps = []
 
-    def __init__(self, rule_path: str, packets_path: str, log_path: str='IDS_log.txt'):
+    def __init__(self, packets_path: str, rule_path: str, log_path: str='IDS_log.txt'):
         '''
         Initialize the Intrusion Detection System. Reads and interprets provided rules,
         and runs system.
@@ -123,9 +124,12 @@ class IDS():
             - packets_path (str): The absolute path to the .pcap file containing the
             packets to be checked.
         '''
-        with open(log_path, 'w') as f:
-            # Truncate file
-            pass
+        try:
+            with open(log_path, 'w') as f:
+                # Truncate file
+                pass
+        except OSError:
+            sys.argv.write("IDS: Error. Could not open log file for writing")
         self.logfile_path = log_path
 
         self.load_rules(rule_path)
@@ -140,14 +144,18 @@ class IDS():
         Parameters:
             - rule_path (str): The absolute path the file containing the rules to be loaded
         '''
-        with (open(rule_path, 'r') as f):
-            lines = f.readlines()
+        try:
+            with (open(rule_path, 'r') as f):
+                lines = f.readlines()
 
-            for line in lines:
-                if line == '\n' or line.startswith('#'):
-                    continue
-                
-                self.rules.append(Rule(line.strip('\n')))
+                for line in lines:
+                    if line == '\n' or line.startswith('#'):
+                        continue
+                    
+                    self.rules.append(Rule(line.strip('\n')))
+        except FileNotFoundError:
+            sys.argv.write("IDS: Error. Could not open rules file")
+            exit(1)
 
     def log(self, msg):
         '''
@@ -158,8 +166,11 @@ class IDS():
         Where Y, M, D, H, M, S is the datetime, and msg is the msg passed to function.
         '''
         # print('Logging')
-        with open(self.logfile_path, 'a+') as f:
-            f.write(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - Alert: {msg}\n')
+        try:
+            with open(self.logfile_path, 'a+') as f:
+                f.write(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - Alert: {msg}\n')
+        except OSError:
+            sys.argv.write("IDS: Error. Could not open log file for writing")
 
     def check_time(self, timestamp, rule, protocol):
         '''
@@ -241,4 +252,10 @@ class IDS():
                             continue
                     else:
                         self.log(rule.log_msg)
-            
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        sys.stderr.write("IDS: Error. Usage IDS.py <path_to_the_pcap_file> <path_to_the_IDS_rules>\n")
+    
+    ids = IDS(sys.argv[1], sys.argv[2])
