@@ -77,16 +77,16 @@ class Rule():
             False: Otherwise
         '''
         # Helpful for bug fixes:
-        print(f'Supplied:\t{trans_prot}, {source_ip}, {dest_ip}, {source_port}, {dest_port}, {content}, {tcp_flags}')
-        print(f'Rule:\t{self.protocol}, {self.source_ip}, {self.dest_ip}, {self.source_port}, {self.dest_port}, {self.content}, {self.tcp_flags}, {self.filter}')
+        # print(f'Supplied:\t{trans_prot}, {source_ip}, {dest_ip}, {source_port}, {dest_port}, {content}, {tcp_flags}')
+        # print(f'Rule:\t{self.protocol}, {self.source_ip}, {self.dest_ip}, {self.source_port}, {self.dest_port}, {self.content}, {self.tcp_flags}, {self.filter}')
 
-        print(f"{self.protocol == 'any' or self.protocol == trans_prot or self.protocol == net_prot}: self.protocol == 'any' or self.protocol == trans_prot or self.protocol == net_prot")
-        print(f"{(self.source_ip == 'any' or self.source_ip == source_ip)}: (self.source_ip == 'any' or self.source_ip == source_ip)")
-        print(f"{self.dest_ip == 'any' or self.dest_ip == dest_ip}: self.dest_ip == 'any' or self.dest_ip == dest_ip")
-        print(f"{self.source_port == 'any' or self.source_port == source_port}: self.source_port == 'any' or self.source_port == source_port")
-        print(f"{self.dest_port == 'any' or self.dest_port == dest_port}: self.dest_port == 'any' or self.dest_port == dest_port")
-        print(f"{(self.content == 'any' or (content is not None and self.content in content))}: (self.content == 'any' or (content is not None and content in self.content))")
-        print(f"{(self.tcp_flags == 'any' or self.tcp_flags == tcp_flags or ('+' in self.tcp_flags and self.tcp_flags[:-1] in tcp_flags))}: (self.tcp_flags == 'any' or self.tcp_flags == tcp_flags or ('+' in self.tcp_flags and self.tcp_flags[:-1] in tcp_flags))")
+        # print(f"{self.protocol == 'any' or self.protocol == trans_prot or self.protocol == net_prot}: self.protocol == 'any' or self.protocol == trans_prot or self.protocol == net_prot")
+        # print(f"{(self.source_ip == 'any' or self.source_ip == source_ip)}: (self.source_ip == 'any' or self.source_ip == source_ip)")
+        # print(f"{self.dest_ip == 'any' or self.dest_ip == dest_ip}: self.dest_ip == 'any' or self.dest_ip == dest_ip")
+        # print(f"{self.source_port == 'any' or self.source_port == source_port}: self.source_port == 'any' or self.source_port == source_port")
+        # print(f"{self.dest_port == 'any' or self.dest_port == dest_port}: self.dest_port == 'any' or self.dest_port == dest_port")
+        # print(f"{(self.content == 'any' or (content is not None and self.content in content))}: (self.content == 'any' or (content is not None and content in self.content))")
+        # print(f"{(self.tcp_flags == 'any' or self.tcp_flags == tcp_flags or ('+' in self.tcp_flags and self.tcp_flags[:-1] in tcp_flags))}: (self.tcp_flags == 'any' or self.tcp_flags == tcp_flags or ('+' in self.tcp_flags and self.tcp_flags[:-1] in tcp_flags))")
 
         if (self.protocol == 'any' or self.protocol == trans_prot or self.protocol == net_prot) \
             and (self.source_ip == 'any' or self.source_ip == source_ip) \
@@ -96,7 +96,7 @@ class Rule():
             and (self.content == 'any' or (content is not None and self.content in content)) \
             and (self.tcp_flags == 'any' or self.tcp_flags == tcp_flags or \
                  ('+' in self.tcp_flags and self.tcp_flags[:-1] in tcp_flags)):
-            print('Returning True for rule match')
+            # print('Returning True for rule match')
             return True
         return False
 
@@ -157,7 +157,7 @@ class IDS():
         
         Where Y, M, D, H, M, S is the datetime, and msg is the msg passed to function.
         '''
-        print('Logging')
+        # print('Logging')
         with open(self.logfile_path, 'a+') as f:
             f.write(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - Alert: {msg}\n')
 
@@ -167,7 +167,7 @@ class IDS():
         the current one/timestamp) within the last filter_secs seconds. Returns True if there
         have been. otherwise returns False.
         '''
-        print('Checking time')
+        # print('Checking time')
         if protocol != 'tcp' or rule.filter == False:
             return False
         
@@ -177,12 +177,12 @@ class IDS():
         # Add new timestamp
         self.timestamps.append(timestamp)
         
-        print(f'Checking packet at timestamp {timestamp}')
-        print(f'Timestamps: {self.timestamps}')
+        # print(f'Checking packet at timestamp {timestamp}')
+        # print(f'Timestamps: {self.timestamps}')
 
         # Check timestamps
         if len(self.timestamps) > rule.filter_count:
-            print(f'Returning True for time match (count: {len(self.timestamps)})')
+            # print(f'Returning True for time match (count: {len(self.timestamps)})')
             return True
         return False
     
@@ -202,8 +202,8 @@ class IDS():
             p = p.__repr__() # Easier format to work with
             p = p.strip('>')
             p = p.split(' |')[:-1]
-            print('-'*20)
-            print(p)
+            # print('-'*20)
+            # print(p)
 
             # Get packet info
             net_prot = p[0].split(' ')[0][1:].lower()   # Network protocol (i.e. IP)
@@ -231,11 +231,11 @@ class IDS():
             # Check for rule matches
             for rule in self.rules:
                 if rule.compare(trans_prot, net_prot, src_ip, dest_ip, src_port, dest_port, content, tcp_flags):
-                    print('Rule true')
+                    # print('Rule true')
                     if rule.filter is True:
-                        print('Has filter')
+                        # print('Has filter')
                         if self.check_time(timestamp, rule, trans_prot):
-                            print('filter true')
+                            # print('filter true')
                             self.log(rule.log_msg)
                         else:
                             continue
